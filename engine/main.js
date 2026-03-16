@@ -4,39 +4,6 @@ import { camera, movePlayer, player } from './player.js';
 import { updateVehicle, isInsideVehicle, spawnCar } from './vehicle.js';
 import './world.js';
 
-// --- INICIO DA ADIÇÃO PARA O INVENTÁRIO ---
-// Lista de itens que o jogador carrega
-export const inventory = [];
-
-// Função para criar itens que podem ser pegos (Ex: 🍔 no chão)
-export function spawnPickup(x, z, name, icon) {
-    const geo = new THREE.BoxGeometry(0.5, 0.5, 0.5);
-    const mat = new THREE.MeshStandardMaterial({ color: 0x00ff00, emissive: 0x00ff00 });
-    const mesh = new THREE.Mesh(geo, mat);
-    mesh.position.set(x, 0.5, z);
-    mesh.userData = { name, icon };
-    scene.add(mesh);
-    return mesh;
-}
-
-// Criando alguns itens de teste no mapa
-const item1 = spawnPickup(5, 5, "Lanche", "🍔");
-const item2 = spawnPickup(-3, 8, "Água", "💧");
-
-// Tecla 'E' para pegar os itens
-window.addEventListener('keydown', (e) => {
-    if (e.key.toLowerCase() === 'e') {
-        [item1, item2].forEach(item => {
-            if (item.parent && player.position.distanceTo(item.position) < 2) {
-                inventory.push({ name: item.userData.name, icon: item.userData.icon });
-                scene.remove(item);
-                console.log("Pegou: " + item.userData.name);
-            }
-        });
-    }
-});
-// --- FIM DA ADIÇÃO ---
-
 // 1. CONFIGURAÇÃO DO RENDERER
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -48,25 +15,46 @@ const sun = new THREE.DirectionalLight(0xffffff, 1);
 sun.position.set(5, 10, 7.5);
 scene.add(sun);
 
-// 3. CRIAR O CARRO (Posição X, Z)
+// 3. CRIAR O CARRO
 spawnCar(-10, -10);
 
-// 4. LOOP DE ANIMAÇÃO
+// 4. SISTEMA DE ITENS (TECLA E PARA PEGAR)
+const itensNoChao = [];
+function criarItem(x, z, nome) {
+    const geo = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+    const mat = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.position.set(x, 0.5, z);
+    mesh.userData = { nome };
+    scene.add(mesh);
+    itensNoChao.push(mesh);
+}
+criarItem(5, 5, "Kit Médico");
+
+window.addEventListener('keydown', (e) => {
+    if (e.key.toLowerCase() === 'e') {
+        itensNoChao.forEach((item, index) => {
+            if (player.position.distanceTo(item.position) < 2) {
+                console.log("Você pegou: " + item.userData.nome);
+                scene.remove(item);
+                itensNoChao.splice(index, 1);
+            }
+        });
+    }
+});
+
+// 5. LOOP DE ANIMAÇÃO
 function animate() {
     requestAnimationFrame(animate);
-
     if (isInsideVehicle) {
-        updateVehicle(); // Se estiver no carro, controla o carro
+        updateVehicle();
     } else {
-        movePlayer();    // Se estiver fora, controla o boneco (pulo/rolagem)
+        movePlayer();
     }
-
     renderer.render(scene, camera);
 }
-
 animate();
 
-// Ajuste de tela caso o jogador redimensione o navegador
 window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
