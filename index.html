@@ -2,99 +2,50 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rp do Zero - Oficial</title>
+    <title>Meu RP - Completo</title>
     <style>
-        /* MANTENDO SEUS ESTILOS ORIGINAIS */
-        body, html { 
-            margin: 0; 
-            padding: 0; 
-            width: 100%; 
-            height: 100%; 
-            overflow: hidden; 
-            background-color: #000; 
-            font-family: sans-serif;
-        }
-
-        #canvas-container { 
-            position: absolute; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%; 
-            z-index: 1; 
-        }
-
-        /* Interface do Usuário (HUD, Chat, etc) */
-        #game-ui {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 10;
-            pointer-events: none; /* Deixa o clique passar para o jogo */
-        }
-
-        #hud-frame {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            width: 400px;
-            height: 250px;
-            border: none;
-            pointer-events: auto;
-        }
-
-        /* O INVENTÁRIO (Aqui está o segredo) */
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; }
+        #canvas-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+        
+        /* IFRAME DO INVENTÁRIO - CONFIGURAÇÃO FORÇADA */
         #inv-frame {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: none;
-            display: none; /* Ele começa invisível */
-            z-index: 100; /* Fica na frente de tudo quando abre */
-            pointer-events: auto;
+            display: none; 
+            position: fixed; 
+            top: 50%; 
+            left: 50%; 
+            transform: translate(-50%, -50%); 
+            width: 500px; 
+            height: 400px; 
+            z-index: 9999; 
+            border: 4px solid #ff4444; 
+            border-radius: 15px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+            background: #1a1a1a;
         }
     </style>
 </head>
 <body>
-
     <div id="canvas-container"></div>
-
-    <div id="game-ui">
-        <iframe src="ui/hud.html" id="hud-frame"></iframe>
-        
-        <iframe src="ui/inventory.html" id="inv-frame"></iframe>
-    </div>
+    
+    <iframe src="ui/inventory.html" id="inv-frame"></iframe>
 
     <script type="importmap">
-        {
-            "imports": {
-                "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
-            }
-        }
+        { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
     </script>
 
     <script type="module" src="engine/main.js"></script>
 
     <script>
+        // Lógica da Tecla I
         window.addEventListener('keydown', (e) => {
-            const key = e.key.toLowerCase();
-
-            // Lógica para Abrir/Fechar Inventário com a tecla I
-            if (key === 'i') {
+            if (e.key.toLowerCase() === 'i') {
                 const inv = document.getElementById('inv-frame');
-                if (inv) {
-                    if (inv.style.display === 'none' || inv.style.display === '') {
-                        inv.style.display = 'block';
-                        console.log("Inventário: Aberto");
-                    } else {
-                        inv.style.display = 'none';
-                        console.log("Inventário: Fechado");
-                    }
+                if (inv.style.display === 'none' || inv.style.display === '') {
+                    inv.style.display = 'block';
+                    console.log("Inventário aberto na tela!");
+                } else {
+                    inv.style.display = 'none';
+                    console.log("Inventário fechado!");
                 }
             }
         });
