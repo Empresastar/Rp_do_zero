@@ -1,0 +1,3 @@
+body { display: flex; justify-content: center; align-items: center; height: 100vh; background: rgba(0,0,0,0.5); color: white; font-family: sans-serif; }
+#box { padding: 40px; border: 2px solid red; background: #000; text-align: center; }
+button { padding: 10px 20px; background: red; color: white; border: none; cursor: pointer; }
