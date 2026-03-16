@@ -2,56 +2,64 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meu RP do Zero</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Meu RP - Interface Corrigida</title>
     <style>
-        /* Estilos para organizar as camadas da tela */
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; }
+        /* 1. O JOGO OCUPA TUDO AO FUNDO */
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #000; }
         
+        #canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1; /* Fica no fundo */
+        }
+
+        /* 2. CAMADA DA INTERFACE (HUD E INV) */
         #game-ui {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 10;
-            pointer-events: none; /* Deixa o clique passar para o jogo por padrão */
+            z-index: 10; /* Fica na frente do jogo */
+            pointer-events: none; /* Deixa o clique passar para o jogo */
         }
 
-        /* Iframes precisam de configurações específicas para não travarem o jogo */
-        iframe {
-            position: absolute;
-            border: none;
-            background: transparent;
-            pointer-events: auto; /* Permite clicar dentro do chat/inventário */
-        }
-
+        /* CHAT (HUD) */
         #hud-frame {
-            bottom: 0;
-            left: 0;
-            width: 500px;
-            height: 300px;
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            width: 400px;
+            height: 250px;
+            border: none;
+            pointer-events: auto; /* Permite clicar no chat */
         }
 
+        /* INVENTÁRIO (OCUPA A TELA TODA) */
         #inv-frame {
+            position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
+            border: none;
             display: none; /* Começa escondido */
+            z-index: 100;
+            pointer-events: auto; /* Permite clicar nos itens */
         }
     </style>
 </head>
 <body>
 
+    <div id="canvas-container"></div>
+
     <div id="game-ui">
         <iframe src="ui/hud.html" id="hud-frame"></iframe>
-        
         <iframe src="ui/inventory.html" id="inv-frame"></iframe>
     </div>
-
-    <div id="canvas-container"></div>
 
     <script type="importmap">
         {
@@ -64,22 +72,17 @@
     <script type="module" src="engine/main.js"></script>
 
     <script>
-        // LÓGICA PARA ABRIR O INVENTÁRIO COM A TECLA 'I'
+        // LÓGICA DO INVENTÁRIO (TECLA I)
         window.addEventListener('keydown', (e) => {
             if (e.key.toLowerCase() === 'i') {
                 const inv = document.getElementById('inv-frame');
-                
                 if (inv.style.display === 'none' || inv.style.display === '') {
                     inv.style.display = 'block';
-                    // Avisa o iframe do inventário para se ativar
-                    inv.contentWindow.postMessage('toggleInventory', '*');
                 } else {
                     inv.style.display = 'none';
-                    inv.contentWindow.postMessage('toggleInventory', '*');
                 }
             }
         });
     </script>
-
 </body>
 </html>
