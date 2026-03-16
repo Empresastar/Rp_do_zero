@@ -40,4 +40,10 @@ console.log("Motor gráfico iniciado com sucesso!");
 animate();
 
 // Exportamos a câmera para o arquivo do jogador poder usar depois
-export { camera };
+function animate() {
+    requestAnimationFrame(animate);
+    
+    movePlayer(); // <--- Isso aqui é o que faz o boneco andar!
+    
+    renderer.render(scene, camera);
+}
