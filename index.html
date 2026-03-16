@@ -2,32 +2,40 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Meu RP - Interface Corrigida</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rp do Zero - Oficial</title>
     <style>
-        /* 1. O JOGO OCUPA TUDO AO FUNDO */
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #000; }
-        
-        #canvas-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1; /* Fica no fundo */
+        /* MANTENDO SEUS ESTILOS ORIGINAIS */
+        body, html { 
+            margin: 0; 
+            padding: 0; 
+            width: 100%; 
+            height: 100%; 
+            overflow: hidden; 
+            background-color: #000; 
+            font-family: sans-serif;
         }
 
-        /* 2. CAMADA DA INTERFACE (HUD E INV) */
+        #canvas-container { 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            z-index: 1; 
+        }
+
+        /* Interface do Usuário (HUD, Chat, etc) */
         #game-ui {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 10; /* Fica na frente do jogo */
+            z-index: 10;
             pointer-events: none; /* Deixa o clique passar para o jogo */
         }
 
-        /* CHAT (HUD) */
         #hud-frame {
             position: absolute;
             bottom: 20px;
@@ -35,10 +43,10 @@
             width: 400px;
             height: 250px;
             border: none;
-            pointer-events: auto; /* Permite clicar no chat */
+            pointer-events: auto;
         }
 
-        /* INVENTÁRIO (OCUPA A TELA TODA) */
+        /* O INVENTÁRIO (Aqui está o segredo) */
         #inv-frame {
             position: absolute;
             top: 0;
@@ -46,9 +54,9 @@
             width: 100%;
             height: 100%;
             border: none;
-            display: none; /* Começa escondido */
-            z-index: 100;
-            pointer-events: auto; /* Permite clicar nos itens */
+            display: none; /* Ele começa invisível */
+            z-index: 100; /* Fica na frente de tudo quando abre */
+            pointer-events: auto;
         }
     </style>
 </head>
@@ -58,6 +66,7 @@
 
     <div id="game-ui">
         <iframe src="ui/hud.html" id="hud-frame"></iframe>
+        
         <iframe src="ui/inventory.html" id="inv-frame"></iframe>
     </div>
 
@@ -72,14 +81,20 @@
     <script type="module" src="engine/main.js"></script>
 
     <script>
-        // LÓGICA DO INVENTÁRIO (TECLA I)
         window.addEventListener('keydown', (e) => {
-            if (e.key.toLowerCase() === 'i') {
+            const key = e.key.toLowerCase();
+
+            // Lógica para Abrir/Fechar Inventário com a tecla I
+            if (key === 'i') {
                 const inv = document.getElementById('inv-frame');
-                if (inv.style.display === 'none' || inv.style.display === '') {
-                    inv.style.display = 'block';
-                } else {
-                    inv.style.display = 'none';
+                if (inv) {
+                    if (inv.style.display === 'none' || inv.style.display === '') {
+                        inv.style.display = 'block';
+                        console.log("Inventário: Aberto");
+                    } else {
+                        inv.style.display = 'none';
+                        console.log("Inventário: Fechado");
+                    }
                 }
             }
         });
