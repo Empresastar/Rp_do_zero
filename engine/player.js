@@ -15,30 +15,54 @@ const keys = {};
 let isRolling = false;
 let rollTimer = 0;
 
+// SISTEMA DE PULO
+let velocityY = 0;
+let isJumping = false;
+const gravity = -0.015;
+const jumpForce = 0.3;
+
 window.addEventListener('keydown', (e) => keys[e.key.toLowerCase()] = true);
 window.addEventListener('keyup', (e) => keys[e.key.toLowerCase()] = false);
 
 export function movePlayer() {
     let speed = 0.15;
 
-    // LÓGICA DE INICIAR O ROLAMENTO (Tecla Espaço)
-    if (keys[' '] && !isRolling) {
+    // 1. LÓGICA DE PULAR (Espaço)
+    if (keys[' '] && !isJumping && !isRolling) {
+        velocityY = jumpForce;
+        isJumping = true;
+    }
+
+    // Aplica gravidade
+    if (isJumping) {
+        player.position.y += velocityY;
+        velocityY += gravity;
+
+        // Se tocar no chão (y=1)
+        if (player.position.y <= 1) {
+            player.position.y = 1;
+            isJumping = false;
+            velocityY = 0;
+        }
+    }
+
+    // 2. LÓGICA DE ROLAGEM (Shift)
+    if (keys['shift'] && !isRolling && !isJumping) {
         isRolling = true;
-        rollTimer = 20; // Duração do rolamento (frames)
+        rollTimer = 20; 
     }
 
     if (isRolling) {
-        speed = 0.4; // Aumenta a velocidade no rolamento
+        speed = 0.4; 
         rollTimer--;
         
-        // "Animação" de rolar: inclina o cubo enquanto rola
         player.rotation.x += 0.3; 
-        player.scale.y = 0.5; // Fica "baixinho" para desviar
+        player.scale.y = 0.5; 
         
         if (rollTimer <= 0) {
             isRolling = false;
-            player.rotation.x = 0; // Volta ao normal
-            player.scale.y = 1;   // Volta ao tamanho real
+            player.rotation.x = 0; 
+            player.scale.y = 1;   
         }
     }
 
