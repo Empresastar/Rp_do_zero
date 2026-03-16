@@ -1,0 +1,3 @@
+import * as THREE from 'three';
+export const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x87ceeb); // Céu azul
