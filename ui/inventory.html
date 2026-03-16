@@ -1,59 +1,126 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
 <head>
+    <meta charset="UTF-8">
     <style>
-        body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: rgba(0,0,0,0.5); font-family: sans-serif; display: none; }
-        #inventory-panel {
-            width: 400px;
-            background: #222;
-            border: 3px solid #444;
-            padding: 20px;
-            border-radius: 10px;
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.6); /* Fundo escuro atrás do menu */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+            user-select: none;
         }
-        h2 { color: white; margin-top: 0; text-align: center; border-bottom: 1px solid #444; padding-bottom: 10px; }
+
+        .inventory-panel {
+            width: 450px;
+            background: #1a1a1a;
+            border: 2px solid #333;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #444;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+        }
+
         .grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(4, 1fr); /* 4 colunas */
             gap: 10px;
+            max-height: 300px;
+            overflow-y: auto;
         }
+
         .slot {
             width: 80px;
             height: 80px;
-            background: #333;
-            border: 2px solid #555;
+            background: #252525;
+            border: 1px solid #444;
             border-radius: 5px;
             display: flex;
             justify-content: center;
             align-items: center;
-            color: #aaa;
-            font-size: 10px;
-            cursor: pointer;
+            font-size: 12px;
+            transition: 0.2s;
+            position: relative;
         }
-        .slot:hover { border-color: #ff4444; background: #3a3a3a; }
-        .item-icon { color: white; font-size: 12px; font-weight: bold; }
+
+        .slot:hover {
+            border-color: #ff4444;
+            background: #333;
+        }
+
+        .item-icon {
+            font-size: 30px;
+        }
+
+        .footer {
+            margin-top: 15px;
+            text-align: center;
+            font-size: 11px;
+            color: #888;
+        }
     </style>
 </head>
 <body>
-    <div id="inventory-panel">
-        <h2>INVENTÁRIO</h2>
-        <div class="grid">
-            <div class="slot"><span class="item-icon">📦 Kit Médico</span></div>
-            <div class="slot"><span class="item-icon">🍔 Lanche</span></div>
-            <div class="slot"><span class="item-icon">💧 Água</span></div>
-            <div class="slot"></div><div class="slot"></div><div class="slot"></div>
-            <div class="slot"></div><div class="slot"></div><div class="slot"></div>
-            <div class="slot"></div><div class="slot"></div><div class="slot"></div>
+
+    <div class="inventory-panel">
+        <div class="header">
+            <h2 style="margin:0; color: #ff4444;">MOCHILA</h2>
+        </div>
+
+        <div class="grid" id="inventory-grid">
+            </div>
+
+        <div class="footer">
+            Pressione 'I' para fechar • Clique para usar item
         </div>
     </div>
 
     <script>
-        // Função para mostrar/esconder
+        const grid = document.getElementById('inventory-grid');
+        const totalSlots = 12; // Número de quadradinhos na mochila
+
+        // Função para desenhar o inventário
+        function renderInventory(items = []) {
+            grid.innerHTML = ""; // Limpa a grade
+
+            // Adiciona os itens que o jogador já tem
+            items.forEach((item) => {
+                const slot = document.createElement('div');
+                slot.className = 'slot';
+                slot.innerHTML = `<span class="item-icon">${item.icon || '📦'}</span>`;
+                slot.title = item.name;
+                grid.appendChild(slot);
+            });
+
+            // Preenche o restante com slots vazios
+            for (let i = items.length; i < totalSlots; i++) {
+                const emptySlot = document.createElement('div');
+                emptySlot.className = 'slot';
+                grid.appendChild(emptySlot);
+            }
+        }
+
+        // Fica ouvindo mensagens do main.js (quando pegar um item)
         window.addEventListener('message', (event) => {
-            if (event.data === 'toggleInventory') {
-                const isVisible = document.body.style.display === 'flex';
-                document.body.style.display = isVisible ? 'none' : 'flex';
+            if (event.data.type === 'updateInventory') {
+                renderInventory(event.data.items);
             }
         });
+
+        // Desenha o inventário vazio ao carregar
+        renderInventory();
     </script>
 </body>
 </html>
