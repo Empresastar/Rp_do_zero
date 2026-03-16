@@ -1,1 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        /* Estilo do Chat */
+        #chat-container {
+            position: absolute;
+            bottom: 50px;
+            left: 20px;
+            width: 400px;
+            height: 200px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 5px;
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            font-family: sans-serif;
+        }
 
+        #messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            color: white;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        #chat-input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid #444;
+            color: white;
+            padding: 5px;
+            outline: none;
+        }
+
+        /* Barras de Status */
+        #bars {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+        }
+
+        .bar {
+            width: 200px;
+            height: 10px;
+            background: #333;
+            margin-bottom: 5px;
+            border: 1px solid #000;
+        }
+
+        .fill { height: 100%; width: 100%; }
+        .health { background: #ff4444; }
+        .stamina { background: #44ff44; width: 80%; }
+    </style>
+</head>
+<body>
+
+    <div id="chat-container">
+        <div id="messages">
+            <div>[Sistema]: Bem-vindo ao servidor!</div>
+            <div>[João]: E aí, beleza?</div>
+        </div>
+        <input type="text" id="chat-input" placeholder="Pressione T para falar...">
+    </div>
+
+    <div id="bars">
+        <div class="bar"><div class="fill health"></div></div>
+        <div class="bar"><div class="fill stamina"></div></div>
+    </div>
+
+</body>
+</html>
