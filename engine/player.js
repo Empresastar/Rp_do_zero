@@ -16,7 +16,6 @@ player.add(playerBody);
 player.position.y = 1.5;
 scene.add(player);
 
-// SENSIBILIDADE E CONTROLE 360
 let yaw = 0;   
 let pitch = 0; 
 const sensitivity = 0.002;
@@ -42,7 +41,6 @@ window.addEventListener('keydown', (e) => keys[e.code] = true);
 window.addEventListener('keyup', (e) => keys[e.code] = false);
 
 export function movePlayer() {
-    // Define quem a câmera vai seguir
     const target = isInsideVehicle ? vehicle : player;
 
     if (!isInsideVehicle) {
@@ -77,7 +75,6 @@ export function movePlayer() {
         player.rotation.y = yaw;
     }
 
-    // AJUSTE DE CÂMERA (A pé vs No Carro)
     const camDistance = isInsideVehicle ? 10 : 6;
     const camHeight = isInsideVehicle ? 4 : 3;
     const currentYaw = isInsideVehicle ? vehicle.rotation.y + yaw : yaw;
