@@ -35,9 +35,9 @@ export function spawnCar(x, z) {
 const keys = {};
 window.addEventListener('keydown', (e) => {
     keys[e.code] = true;
-    if(e.code === 'KeyF' && player.position.distanceTo(vehicle.position) < 4) {
+    if(e.code === 'KeyF' && player.position.distanceTo(vehicle.position) < 5) {
         isInsideVehicle = !isInsideVehicle;
-        player.visible = !isInsideVehicle; 
+        player.visible = !isInsideVehicle;
     }
 });
 window.addEventListener('keyup', (e) => keys[e.code] = false);
@@ -45,14 +45,17 @@ window.addEventListener('keyup', (e) => keys[e.code] = false);
 export function updateVehicle() {
     if(!isInsideVehicle) return;
 
-    if(keys['KeyW']) speed += 0.015;
+    if(keys['KeyW']) speed += 0.02; // Aumentei um pouco a aceleração
     if(keys['KeyS']) speed -= 0.01;
-    speed *= 0.96; 
+    speed *= 0.97; 
 
-    if(keys['KeyA']) vehicle.rotation.y += 0.04 * (speed >= 0 ? 1 : -1);
-    if(keys['KeyD']) vehicle.rotation.y -= 0.04 * (speed >= 0 ? 1 : -1);
+    if(keys['KeyA']) vehicle.rotation.y += 0.04;
+    if(keys['KeyD']) vehicle.rotation.y -= 0.04;
 
     vehicle.translateZ(speed);
-    player.position.copy(vehicle.position); 
-    wheels.forEach(w => w.rotation.x += speed); 
+    
+    // IMPORTANTE: Mantém o player na posição do carro para a câmera ler
+    player.position.copy(vehicle.position);
+    
+    wheels.forEach(w => w.rotation.x += speed * 2); 
 }
