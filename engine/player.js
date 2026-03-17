@@ -41,6 +41,7 @@ window.addEventListener('keydown', (e) => keys[e.code] = true);
 window.addEventListener('keyup', (e) => keys[e.code] = false);
 
 export function movePlayer() {
+    // ESSENCIAL: A câmera foca no carro se estiver dentro dele
     const target = isInsideVehicle ? vehicle : player;
 
     if (!isInsideVehicle) {
@@ -75,14 +76,17 @@ export function movePlayer() {
         player.rotation.y = yaw;
     }
 
-    const camDistance = isInsideVehicle ? 10 : 6;
-    const camHeight = isInsideVehicle ? 4 : 3;
-    const currentYaw = isInsideVehicle ? vehicle.rotation.y + yaw : yaw;
+    // AJUSTE DA CÂMERA PARA NÃO TRAVAR
+    const camDistance = isInsideVehicle ? 12 : 6;
+    const camHeight = isInsideVehicle ? 5 : 3;
+    const rotY = isInsideVehicle ? vehicle.rotation.y + yaw : yaw;
 
-    camera.position.set(
-        target.position.x + Math.sin(currentYaw) * camDistance,
-        target.position.y + camHeight + Math.sin(pitch) * 2,
-        target.position.z + Math.cos(currentYaw) * camDistance
+    const desiredPosition = new THREE.Vector3(
+        target.position.x + Math.sin(rotY) * camDistance,
+        target.position.y + camHeight + Math.sin(pitch) * 3,
+        target.position.z + Math.cos(rotY) * camDistance
     );
+
+    camera.position.copy(desiredPosition);
     camera.lookAt(target.position.x, target.position.y + 1, target.position.z);
 }
