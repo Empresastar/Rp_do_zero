@@ -1,12 +1,10 @@
 import * as THREE from 'three';
 import { scene } from './state.js';
-import { objetosColidiveis } from './world.js';
 
 export const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 export const player = new THREE.Group(); 
 
 const loader = new THREE.TextureLoader();
-// TEXTURA DO PERSONAGEM
 const charTex = loader.load('https://threejs.org/examples/textures/uv_grid_opengl.jpg'); 
 
 const playerBody = new THREE.Mesh(
@@ -16,6 +14,25 @@ const playerBody = new THREE.Mesh(
 player.add(playerBody);
 player.position.y = 1.5;
 scene.add(player);
+
+// SENSIBILIDADE E CONTROLE 360
+let yaw = 0;   
+let pitch = 0; 
+const sensitivity = 0.002;
+
+document.addEventListener('mousedown', () => {
+    if (document.pointerLockElement !== document.body) {
+        document.body.requestPointerLock();
+    }
+});
+
+document.addEventListener('mousemove', (e) => {
+    if (document.pointerLockElement === document.body) {
+        yaw -= e.movementX * sensitivity;
+        pitch -= e.movementY * sensitivity;
+        pitch = Math.max(-Math.PI / 3, Math.min(Math.PI / 3, pitch)); 
+    }
+});
 
 const keys = {};
 let isRolling = false;
@@ -31,6 +48,8 @@ export function movePlayer() {
     if (keys['KeyS']) moveDir.z += 1;
     if (keys['KeyA']) moveDir.x -= 1;
     if (keys['KeyD']) moveDir.x += 1;
+    
+    moveDir.applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw);
     moveDir.normalize();
 
     if (keys['ShiftLeft'] && moveDir.length() > 0 && !isRolling) {
@@ -55,7 +74,13 @@ export function movePlayer() {
     if (player.position.y > 1.5) velocityY -= 0.01;
     else { player.position.y = 1.5; velocityY = 0; }
 
-    const camOffset = new THREE.Vector3(player.position.x, player.position.y + 3, player.position.z + 6);
-    camera.position.lerp(camOffset, 0.1);
-    camera.lookAt(player.position);
+    player.rotation.y = yaw;
+    
+    const camDistance = 6;
+    camera.position.set(
+        player.position.x + Math.sin(yaw) * camDistance,
+        player.position.y + 3 + Math.sin(pitch) * 2,
+        player.position.z + Math.cos(yaw) * camDistance
+    );
+    camera.lookAt(player.position.x, player.position.y + 1, player.position.z);
 }
