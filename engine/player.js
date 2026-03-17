@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { scene } from './state.js';
+import { isInsideVehicle, vehicle } from './vehicle.js';
 
 export const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 export const player = new THREE.Group(); 
@@ -21,9 +22,7 @@ let pitch = 0;
 const sensitivity = 0.002;
 
 document.addEventListener('mousedown', () => {
-    if (document.pointerLockElement !== document.body) {
-        document.body.requestPointerLock();
-    }
+    if (document.pointerLockElement !== document.body) document.body.requestPointerLock();
 });
 
 document.addEventListener('mousemove', (e) => {
@@ -43,44 +42,50 @@ window.addEventListener('keydown', (e) => keys[e.code] = true);
 window.addEventListener('keyup', (e) => keys[e.code] = false);
 
 export function movePlayer() {
-    const moveDir = new THREE.Vector3();
-    if (keys['KeyW']) moveDir.z -= 1;
-    if (keys['KeyS']) moveDir.z += 1;
-    if (keys['KeyA']) moveDir.x -= 1;
-    if (keys['KeyD']) moveDir.x += 1;
-    
-    moveDir.applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw);
-    moveDir.normalize();
+    // Define quem a câmera vai seguir
+    const target = isInsideVehicle ? vehicle : player;
 
-    if (keys['ShiftLeft'] && moveDir.length() > 0 && !isRolling) {
-        isRolling = true;
-        rollTimer = 0;
-    }
+    if (!isInsideVehicle) {
+        const moveDir = new THREE.Vector3();
+        if (keys['KeyW']) moveDir.z -= 1;
+        if (keys['KeyS']) moveDir.z += 1;
+        if (keys['KeyA']) moveDir.x -= 1;
+        if (keys['KeyD']) moveDir.x += 1;
+        
+        moveDir.applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw);
+        moveDir.normalize();
 
-    if (isRolling) {
-        rollTimer += 0.15;
-        playerBody.rotation.x += 0.4; 
-        player.position.addScaledVector(moveDir, 0.3);
-        if (rollTimer > Math.PI * 2) {
-            isRolling = false;
-            playerBody.rotation.x = 0;
+        if (keys['ShiftLeft'] && moveDir.length() > 0 && !isRolling) {
+            isRolling = true;
+            rollTimer = 0;
         }
-    } else {
-        player.position.addScaledVector(moveDir, 0.15);
+
+        if (isRolling) {
+            rollTimer += 0.15;
+            playerBody.rotation.x += 0.4; 
+            player.position.addScaledVector(moveDir, 0.3);
+            if (rollTimer > Math.PI * 2) { isRolling = false; playerBody.rotation.x = 0; }
+        } else {
+            player.position.addScaledVector(moveDir, 0.15);
+        }
+
+        if (keys['Space'] && player.position.y <= 1.5) velocityY = 0.2;
+        player.position.y += velocityY;
+        if (player.position.y > 1.5) velocityY -= 0.01;
+        else { player.position.y = 1.5; velocityY = 0; }
+
+        player.rotation.y = yaw;
     }
 
-    if (keys['Space'] && player.position.y <= 1.5) velocityY = 0.2;
-    player.position.y += velocityY;
-    if (player.position.y > 1.5) velocityY -= 0.01;
-    else { player.position.y = 1.5; velocityY = 0; }
+    // AJUSTE DE CÂMERA (A pé vs No Carro)
+    const camDistance = isInsideVehicle ? 10 : 6;
+    const camHeight = isInsideVehicle ? 4 : 3;
+    const currentYaw = isInsideVehicle ? vehicle.rotation.y + yaw : yaw;
 
-    player.rotation.y = yaw;
-    
-    const camDistance = 6;
     camera.position.set(
-        player.position.x + Math.sin(yaw) * camDistance,
-        player.position.y + 3 + Math.sin(pitch) * 2,
-        player.position.z + Math.cos(yaw) * camDistance
+        target.position.x + Math.sin(currentYaw) * camDistance,
+        target.position.y + camHeight + Math.sin(pitch) * 2,
+        target.position.z + Math.cos(currentYaw) * camDistance
     );
-    camera.lookAt(player.position.x, player.position.y + 1, player.position.z);
+    camera.lookAt(target.position.x, target.position.y + 1, target.position.z);
 }
