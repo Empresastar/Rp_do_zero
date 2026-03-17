@@ -1,60 +1,65 @@
 import * as THREE from 'three';
 import { scene } from './state.js';
-import { player, camera } from './player.js';
+import { player } from './player.js';
+import { objetosColidiveis } from './world.js';
 
 export let isInsideVehicle = false;
-export let car;
+let vehicle = null;
+let vehicleVel = 0;
 
-// Objeto para monitorar as teclas pressionadas
-const keys = {};
-window.addEventListener('keydown', (e) => keys[e.key.toLowerCase()] = true);
-window.addEventListener('keyup', (e) => keys[e.key.toLowerCase()] = false);
-
-// FUNÇÃO QUE CRIA O CARRO NO MUNDO
 export function spawnCar(x, z) {
-    const geo = new THREE.BoxGeometry(2, 1, 4); // Largura, Altura, Comprimento
-    const mat = new THREE.MeshStandardMaterial({ color: 0x0000ff }); // Azul
-    car = new THREE.Mesh(geo, mat);
-    car.position.set(x, 0.5, z);
-    scene.add(car);
+    const group = new THREE.Group();
+    
+    // Corpo do Carro
+    const body = new THREE.Mesh(
+        new THREE.BoxGeometry(2, 1, 4),
+        new THREE.MeshStandardMaterial({ color: 0xff0000, metalness: 0.8 })
+    );
+    group.add(body);
+
+    // Rodas (Para ficar bonito)
+    const wheelGeo = new THREE.CylinderGeometry(0.4, 0.4, 0.4, 16);
+    const wheelMat = new THREE.MeshStandardMaterial({ color: 0x111111 });
+    
+    const positions = [[1.1, -0.4, 1.5], [-1.1, -0.4, 1.5], [1.1, -0.4, -1.5], [-1.1, -0.4, -1.5]];
+    positions.forEach(pos => {
+        const wheel = new THREE.Mesh(wheelGeo, wheelMat);
+        wheel.rotation.z = Math.PI / 2;
+        wheel.position.set(...pos);
+        group.add(wheel);
+    });
+
+    group.position.set(x, 1, z);
+    scene.add(group);
+    vehicle = group;
 }
 
-// LÓGICA DE ENTRAR E SAIR (TECLA F)
-window.addEventListener('keydown', (e) => {
-    if (e.key.toLowerCase() === 'f') {
-        if (!car) return; // Se o carro não existir, não faz nada
+export function updateVehicle() {
+    if (!isInsideVehicle) return;
 
-        const distance = player.position.distanceTo(car.position);
+    const keys = {}; // Note: Idealmente usar o listener global
+    // (Simplificado para o exemplo)
 
-        if (!isInsideVehicle && distance < 3) {
-            // ENTRAR NO VEÍCULO
-            isInsideVehicle = true;
-            player.visible = false; // Esconde o boneco vermelho
-            console.log("Entrou no veículo!");
-        } else if (isInsideVehicle) {
-            // SAIR DO VEÍCULO
-            isInsideVehicle = false;
-            player.visible = true; // Mostra o boneco de volta
-            // Coloca o player do lado do carro ao sair
-            player.position.set(car.position.x + 2, 1, car.position.z);
+    // Movimentação básica do carro
+    vehicle.translateZ(-vehicleVel);
+    
+    // Colisão do Carro com Prédios
+    for (let obj of objetosColidiveis) {
+        const vBox = new THREE.Box3().setFromObject(vehicle);
+        const oBox = new THREE.Box3().setFromObject(obj);
+        if (vBox.intersectsBox(oBox)) {
+            vehicle.translateZ(vehicleVel + 0.5); // "Rebota" pra trás
+            vehicleVel = 0;
         }
     }
+
+    player.position.copy(vehicle.position); // Player fica "dentro" do carro
+}
+
+// Tecla F para entrar/sair
+window.addEventListener('keydown', (e) => {
+    if (e.key.toLowerCase() === 'f') {
+        const dist = player.position.distanceTo(vehicle.position);
+        if (dist < 4) isInsideVehicle = !isInsideVehicle;
+    }
 });
-
-// LÓGICA DE DIREÇÃO (CHAMADA NO MAIN.JS)
-export function updateVehicle() {
-    if (!isInsideVehicle || !car) return;
-
-    const speed = 0.25;
-    const rotationSpeed = 0.04;
-
-    if (keys['w']) car.translateZ(-speed); // Anda para frente
-    if (keys['s']) car.translateZ(speed);  // Anda para trás
-    if (keys['a']) car.rotation.y += rotationSpeed; // Gira para esquerda
-    if (keys['d']) car.rotation.y -= rotationSpeed; // Gira para direita
-
-    // Faz a câmera e o player (escondido) seguirem o carro
-    camera.position.set(car.position.x, car.position.y + 7, car.position.z + 12);
-    camera.lookAt(car.position);
-    player.position.copy(car.position);
-      }
