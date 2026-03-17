@@ -18,8 +18,14 @@ spawnCar(-10, -10);
 
 function animate() {
     requestAnimationFrame(animate);
-    if (isInsideVehicle) updateVehicle();
-    else movePlayer();
+    
+    if (isInsideVehicle) {
+        updateVehicle();
+    }
+    
+    // O segredo está aqui: movePlayer agora atualiza a câmera sempre!
+    movePlayer();
+    
     renderer.render(scene, camera);
 }
 animate();
