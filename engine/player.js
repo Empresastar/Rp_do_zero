@@ -1,78 +1,59 @@
 import * as THREE from 'three';
 import { scene } from './state.js';
+import { objetosColidiveis } from './world.js';
 
 export const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-
-// CORPO DO JOGADOR
-const geometry = new THREE.BoxGeometry(1, 2, 1);
-const material = new THREE.MeshStandardMaterial({ color: 0xff4444 });
-export const player = new THREE.Mesh(geometry, material);
-player.position.y = 1;
+export const player = new THREE.Mesh(
+    new THREE.CapsuleGeometry(0.5, 1, 4, 8),
+    new THREE.MeshStandardMaterial({ color: 0xffcc00 })
+);
+player.position.y = 1.5;
 scene.add(player);
 
-// VARIÁVEIS DE MOVIMENTO
 const keys = {};
-let isRolling = false;
-let rollTimer = 0;
+window.addEventListener('keydown', (e) => keys[e.code] = true);
+window.addEventListener('keyup', (e) => keys[e.code] = false);
 
-// SISTEMA DE PULO
 let velocityY = 0;
-let isJumping = false;
-const gravity = -0.015;
-const jumpForce = 0.3;
-
-window.addEventListener('keydown', (e) => keys[e.key.toLowerCase()] = true);
-window.addEventListener('keyup', (e) => keys[e.key.toLowerCase()] = false);
+const gravity = -0.01;
 
 export function movePlayer() {
-    let speed = 0.15;
+    const speed = keys['ShiftLeft'] ? 0.2 : 0.1;
+    let nextPos = player.position.clone();
 
-    // 1. LÓGICA DE PULAR (Espaço)
-    if (keys[' '] && !isJumping && !isRolling) {
-        velocityY = jumpForce;
-        isJumping = true;
-    }
+    if (keys['KeyW']) nextPos.z -= speed;
+    if (keys['KeyS']) nextPos.z += speed;
+    if (keys['KeyA']) nextPos.x -= speed;
+    if (keys['KeyD']) nextPos.x += speed;
 
-    // Aplica gravidade
-    if (isJumping) {
-        player.position.y += velocityY;
-        velocityY += gravity;
-
-        // Se tocar no chão (y=1)
-        if (player.position.y <= 1) {
-            player.position.y = 1;
-            isJumping = false;
-            velocityY = 0;
+    // SISTEMA DE COLISÃO
+    let colidiu = false;
+    for (let obj of objetosColidiveis) {
+        // Checa distância entre player e o prédio
+        const box = new THREE.Box3().setFromObject(obj);
+        const playerBox = new THREE.Box3().setFromCenterAndSize(nextPos, new THREE.Vector3(1, 2, 1));
+        
+        if (box.intersectsBox(playerBox)) {
+            colidiu = true;
+            break;
         }
     }
 
-    // 2. LÓGICA DE ROLAGEM (Shift)
-    if (keys['shift'] && !isRolling && !isJumping) {
-        isRolling = true;
-        rollTimer = 20; 
+    if (!colidiu) {
+        player.position.copy(nextPos);
     }
 
-    if (isRolling) {
-        speed = 0.4; 
-        rollTimer--;
-        
-        player.rotation.x += 0.3; 
-        player.scale.y = 0.5; 
-        
-        if (rollTimer <= 0) {
-            isRolling = false;
-            player.rotation.x = 0; 
-            player.scale.y = 1;   
-        }
+    // Pulo Simples
+    if (keys['Space'] && player.position.y <= 1.5) velocityY = 0.2;
+    
+    player.position.y += velocityY;
+    if (player.position.y > 1.5) velocityY += gravity;
+    else {
+        player.position.y = 1.5;
+        velocityY = 0;
     }
 
-    // MOVIMENTAÇÃO BÁSICA
-    if (keys['w']) player.position.z -= speed;
-    if (keys['s']) player.position.z += speed;
-    if (keys['a']) player.position.x -= speed;
-    if (keys['d']) player.position.x += speed;
-
-    // CÂMERA SEGUINDO
+    // Câmera segue o player
     camera.position.set(player.position.x, player.position.y + 5, player.position.z + 10);
     camera.lookAt(player.position);
 }
