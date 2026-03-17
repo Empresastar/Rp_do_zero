@@ -1,60 +1,41 @@
 import * as THREE from 'three';
 import { scene } from './state.js';
-import { camera, movePlayer, player } from './player.js';
+import { camera, movePlayer } from './player.js';
 import { updateVehicle, isInsideVehicle, spawnCar } from './vehicle.js';
 import './world.js';
+import './combat.js'; // ISSO ATIVA O SISTEMA DE ARMAS
 
-// 1. CONFIGURAÇÃO DO RENDERER
+// 1. RENDERIZADOR
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(window.devicePixelRatio);
 document.getElementById('canvas-container').appendChild(renderer.domElement);
 
-// 2. LUZES
+// 2. ILUMINAÇÃO
 scene.add(new THREE.AmbientLight(0xffffff, 0.6));
 const sun = new THREE.DirectionalLight(0xffffff, 1);
-sun.position.set(5, 10, 7.5);
+sun.position.set(10, 20, 10);
 scene.add(sun);
 
-// 3. CRIAR O CARRO
+// 3. SPAWN DO CARRO
 spawnCar(-10, -10);
 
-// 4. SISTEMA DE ITENS (TECLA E PARA PEGAR)
-const itensNoChao = [];
-function criarItem(x, z, nome) {
-    const geo = new THREE.BoxGeometry(0.5, 0.5, 0.5);
-    const mat = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
-    const mesh = new THREE.Mesh(geo, mat);
-    mesh.position.set(x, 0.5, z);
-    mesh.userData = { nome };
-    scene.add(mesh);
-    itensNoChao.push(mesh);
-}
-criarItem(5, 5, "Kit Médico");
-
-window.addEventListener('keydown', (e) => {
-    if (e.key.toLowerCase() === 'e') {
-        itensNoChao.forEach((item, index) => {
-            if (player.position.distanceTo(item.position) < 2) {
-                console.log("Você pegou: " + item.userData.nome);
-                scene.remove(item);
-                itensNoChao.splice(index, 1);
-            }
-        });
-    }
-});
-
-// 5. LOOP DE ANIMAÇÃO
+// 4. LOOP PRINCIPAL (FRAME POR FRAME)
 function animate() {
     requestAnimationFrame(animate);
+
     if (isInsideVehicle) {
-        updateVehicle();
+        updateVehicle(); // Se estiver no carro
     } else {
-        movePlayer();
+        movePlayer();    // Se estiver a pé (inclui pulo e rolamento)
     }
+
     renderer.render(scene, camera);
 }
+
 animate();
 
+// AJUSTE DE TELA
 window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
