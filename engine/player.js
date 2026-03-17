@@ -5,10 +5,13 @@ import { objetosColidiveis } from './world.js';
 export const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 export const player = new THREE.Group(); 
 
-// Corpo do personagem
+const loader = new THREE.TextureLoader();
+// TEXTURA DO PERSONAGEM
+const charTex = loader.load('https://threejs.org/examples/textures/uv_grid_opengl.jpg'); 
+
 const playerBody = new THREE.Mesh(
     new THREE.CapsuleGeometry(0.5, 1, 4, 8),
-    new THREE.MeshStandardMaterial({ color: 0xffcc00 })
+    new THREE.MeshStandardMaterial({ map: charTex })
 );
 player.add(playerBody);
 player.position.y = 1.5;
@@ -30,7 +33,6 @@ export function movePlayer() {
     if (keys['KeyD']) moveDir.x += 1;
     moveDir.normalize();
 
-    // LÓGICA DO ROLAMENTO (SHIFT)
     if (keys['ShiftLeft'] && moveDir.length() > 0 && !isRolling) {
         isRolling = true;
         rollTimer = 0;
@@ -38,7 +40,7 @@ export function movePlayer() {
 
     if (isRolling) {
         rollTimer += 0.15;
-        playerBody.rotation.x += 0.4; // Gira o corpo (Animação)
+        playerBody.rotation.x += 0.4; 
         player.position.addScaledVector(moveDir, 0.3);
         if (rollTimer > Math.PI * 2) {
             isRolling = false;
@@ -48,13 +50,11 @@ export function movePlayer() {
         player.position.addScaledVector(moveDir, 0.15);
     }
 
-    // PULO
     if (keys['Space'] && player.position.y <= 1.5) velocityY = 0.2;
     player.position.y += velocityY;
     if (player.position.y > 1.5) velocityY -= 0.01;
     else { player.position.y = 1.5; velocityY = 0; }
 
-    // CÂMERA
     const camOffset = new THREE.Vector3(player.position.x, player.position.y + 3, player.position.z + 6);
     camera.position.lerp(camOffset, 0.1);
     camera.lookAt(player.position);
