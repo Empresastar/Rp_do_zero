@@ -44,15 +44,14 @@ window.addEventListener('keyup', (e) => keys[e.code] = false);
 export function updateVehicle() {
     if(!isInsideVehicle) return;
 
-    if(keys['KeyW']) speed += 0.012;
-    if(keys['KeyS']) speed -= 0.008;
-    speed *= 0.97; // Atrito suave
+    if(keys['KeyW']) speed += 0.015;
+    if(keys['KeyS']) speed -= 0.01;
+    speed *= 0.96; 
 
-    if(keys['KeyA']) vehicle.rotation.y += 0.035 * (speed >= 0 ? 1 : -1);
-    if(keys['KeyD']) vehicle.rotation.y -= 0.035 * (speed >= 0 ? 1 : -1);
+    if(keys['KeyA']) vehicle.rotation.y += 0.04 * (speed >= 0 ? 1 : -1);
+    if(keys['KeyD']) vehicle.rotation.y -= 0.04 * (speed >= 0 ? 1 : -1);
 
     vehicle.translateZ(speed);
     player.position.copy(vehicle.position);
-    
     wheels.forEach(w => w.rotation.x += speed); 
 }
