@@ -2,76 +2,57 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Meu RP - Completo</title>
+    <title>RP PVP - Completo</title>
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; font-family: 'Arial', sans-serif; }
         #canvas-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
         
-        /* CAMADA DA INTERFACE */
-        #game-ui {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 10;
-            pointer-events: none;
+        /* MIRA */
+        #crosshair {
+            position: fixed; top: 50%; left: 50%; width: 12px; height: 12px;
+            border: 2px solid white; border-radius: 50%; transform: translate(-50%, -50%);
+            z-index: 100; pointer-events: none;
         }
 
-        /* HUD (FOME, SEDE, CHAT) - Fica sempre visível */
-        #hud-frame {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: none;
-            pointer-events: none; /* Deixa clicar no jogo através do HUD */
+        /* MENU DE ARMAS */
+        #weapon-menu {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            display: flex; gap: 15px; z-index: 110; background: rgba(0,0,0,0.7);
+            padding: 15px; border-radius: 12px; border: 2px solid #555;
         }
+        .slot {
+            width: 70px; height: 70px; background: #222; border: 2px solid #444;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: #aaa; font-size: 10px; font-weight: bold; transition: 0.3s;
+        }
+        .slot.active { border-color: #ff4444; color: white; background: #441111; transform: scale(1.1); }
 
-        /* INVENTÁRIO - Só aparece no 'I' */
-        #inv-frame {
-            display: none; 
-            position: fixed; 
-            top: 50%; 
-            left: 50%; 
-            transform: translate(-50%, -50%); 
-            width: 500px; 
-            height: 400px; 
-            z-index: 9999; 
-            border: 4px solid #ff4444; 
-            border-radius: 15px;
-            background: #1a1a1a;
-            pointer-events: auto; /* Permite clicar nos itens */
-        }
+        /* HUD E INVENTÁRIO */
+        #hud-frame { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; pointer-events: none; z-index: 50; }
+        #inv-frame { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 500px; height: 400px; z-index: 200; border: none; }
     </style>
 </head>
 <body>
     <div id="canvas-container"></div>
-    
-    <div id="game-ui">
-        <iframe src="ui/hud.html" id="hud-frame"></iframe>
+    <div id="crosshair"></div>
 
-        <iframe src="ui/inventory.html" id="inv-frame"></iframe>
+    <div id="weapon-menu">
+        <div id="slot-1" class="slot active"><span>1</span><br>GLOCK</div>
+        <div id="slot-2" class="slot"><span>2</span><br>M4A1</div>
+        <div id="slot-3" class="slot"><span>3</span><br>AK-47</div>
     </div>
 
-    <script type="importmap">
-        { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
-    </script>
+    <iframe src="ui/hud.html" id="hud-frame"></iframe>
+    <iframe src="ui/inventory.html" id="inv-frame"></iframe>
 
+    <script type="importmap"> { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } } </script>
     <script type="module" src="engine/main.js"></script>
 
     <script>
-        // Tecla I - Inventário
         window.addEventListener('keydown', (e) => {
             if (e.key.toLowerCase() === 'i') {
                 const inv = document.getElementById('inv-frame');
-                if (inv.style.display === 'none' || inv.style.display === '') {
-                    inv.style.display = 'block';
-                    console.log("HUD visível + Inventário aberto!");
-                } else {
-                    inv.style.display = 'none';
-                }
+                inv.style.display = (inv.style.display === 'none' || inv.style.display === '') ? 'block' : 'none';
             }
         });
     </script>
