@@ -45,17 +45,20 @@ window.addEventListener('keyup', (e) => keys[e.code] = false);
 export function updateVehicle() {
     if(!isInsideVehicle) return;
 
-    if(keys['KeyW']) speed += 0.02; // Aumentei um pouco a aceleração
-    if(keys['KeyS']) speed -= 0.01;
-    speed *= 0.97; 
+    // CORREÇÃO AQUI: W agora aumenta a velocidade positiva, S diminui
+    if(keys['KeyW']) speed -= 0.02; // No Three.js, -Z geralmente é a frente
+    if(keys['KeyS']) speed += 0.01;
+    
+    speed *= 0.97; // Fricção
 
-    if(keys['KeyA']) vehicle.rotation.y += 0.04;
-    if(keys['KeyD']) vehicle.rotation.y -= 0.04;
+    // Ajuste de curva baseado na nova direção da velocidade
+    if(keys['KeyA']) vehicle.rotation.y += 0.04 * (speed < 0 ? 1 : -1);
+    if(keys['KeyD']) vehicle.rotation.y -= 0.04 * (speed < 0 ? 1 : -1);
 
     vehicle.translateZ(speed);
     
-    // IMPORTANTE: Mantém o player na posição do carro para a câmera ler
     player.position.copy(vehicle.position);
     
+    // As rodas giram conforme a velocidade
     wheels.forEach(w => w.rotation.x += speed * 2); 
 }
