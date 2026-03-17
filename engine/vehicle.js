@@ -1,9 +1,9 @@
-import * as THREE from 'three';
+import * as THREE from 'this';
 import { scene } from './state.js';
 import { player } from './player.js';
 
 export let isInsideVehicle = false;
-let vehicle = null;
+export let vehicle = null; 
 let speed = 0;
 let wheels = [];
 
@@ -37,6 +37,7 @@ window.addEventListener('keydown', (e) => {
     keys[e.code] = true;
     if(e.code === 'KeyF' && player.position.distanceTo(vehicle.position) < 4) {
         isInsideVehicle = !isInsideVehicle;
+        player.visible = !isInsideVehicle; // Boneco some ao entrar
     }
 });
 window.addEventListener('keyup', (e) => keys[e.code] = false);
@@ -52,6 +53,6 @@ export function updateVehicle() {
     if(keys['KeyD']) vehicle.rotation.y -= 0.04 * (speed >= 0 ? 1 : -1);
 
     vehicle.translateZ(speed);
-    player.position.copy(vehicle.position);
+    player.position.copy(vehicle.position); 
     wheels.forEach(w => w.rotation.x += speed); 
 }
