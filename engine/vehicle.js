@@ -1,4 +1,4 @@
-import * as THREE from 'this';
+import * as THREE from 'three';
 import { scene } from './state.js';
 import { player } from './player.js';
 
@@ -37,7 +37,7 @@ window.addEventListener('keydown', (e) => {
     keys[e.code] = true;
     if(e.code === 'KeyF' && player.position.distanceTo(vehicle.position) < 4) {
         isInsideVehicle = !isInsideVehicle;
-        player.visible = !isInsideVehicle; // Boneco some ao entrar
+        player.visible = !isInsideVehicle; 
     }
 });
 window.addEventListener('keyup', (e) => keys[e.code] = false);
